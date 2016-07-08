@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Pad</title>
+ 
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+        <meta name="HandheldFriendly" content="true" />
+ 
+        <script src="/lib/js/jquery-2.2.4.min.js"></script>
+        <script src="/lib/js/socket.io-1.4.5.js"></script>
+        <script src="/lib/js/hammer-time.min.js"></script>
+        
+        <!-- Latest compiled and minified CSS -->
+        <link rel="stylesheet" href="/lib/css/bootstrap.min.css" >
+        <link rel="stylesheet" href="/lib/css/font-awesome.min.css" >
+
+        <!-- Optional theme -->
+        <link rel="stylesheet" href="/lib/css/bootstrap-theme.min.css" >
+
+        <!-- Latest compiled and minified JavaScript -->
+        <script src="/lib/js/bootstrap.min.js"></script>
+
+
+        <link rel="stylesheet" href="/app/style.css">
+        <script src="/pad-client.js"></script>
+    </head>
+<body>
+    <!-- Snes9x 
+     <div class="pad">
+        <div id="up" class="button updown"><i class="fa fa-angle-up"></i></div>
+        <div id="down" class="button updown"><i class="fa fa-angle-down"></i></div><br/>
+        <div id="left" class="button updown"><i class="fa fa-angle-left"></i></div>
+        <div id="right" class="button updown"><i class="fa fa-angle-right"></i></div>
+     </div>
+     <div class="pad pull-right">
+        <div id="space" class="button updown"><i class="fa fa-play-circle"></i></div>
+        <div id="c" class="button updown">B (jump)</div>
+        <div id="v" class="button updown">A</div>
+        <div id="x" class="button toggle">X (run)</div>
+     </div>
+     -->
+     <div class="pad pull-right">
+        <div id="enter" class="button updown"><i class="fa fa-play-circle"></i></div>
+        <br/>
+        <div id="." class="button updown">A</div>
+        <div id="," class="button updown">B (jump)</div>
+     </div>
+     <div class="pad">
+        <div id="up" class="button updown"><i class="fa fa-angle-up"></i></div>
+        <div id="down" class="button updown"><i class="fa fa-angle-down"></i></div><br/>
+        <div id="left" class="button updown"><i class="fa fa-angle-left"></i></div>
+        <div id="right" class="button updown"><i class="fa fa-angle-right"></i></div>
+     </div>
+
+</body> 
+</html>

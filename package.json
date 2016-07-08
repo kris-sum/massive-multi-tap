@@ -1,0 +1,18 @@
+{
+  "name": "massive-multi-tap",
+  "version": "1.0.0",
+  "description": "Massively Multiplayer Gamepad input (tap)",
+  "main": "tap.js",
+  "dependencies": {
+    "express": "^4.14.0",
+    "http": "0.0.0",
+    "robotjs": "^0.4.4",
+    "socket.io": "^1.4.8"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Kris Sum",
+  "license": "ISC"
+}
