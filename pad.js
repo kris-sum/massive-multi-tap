@@ -12,8 +12,7 @@ app.listen(80, function() { console.log('web listening on port 80')});
  
 io.sockets.on('connection', function (socket) {
     socket.user_id = 0; // current user ID
-    var address = socket.handshake.address;
-    console.log('Client connected from ' + address.address + ':'+address.port);
+    console.log('Client connected ' + socket.id + ' from ' + socket.request.connection.remoteAddress);
 
     socket.emit('welcome', {message: 'Welcome!'});
  
