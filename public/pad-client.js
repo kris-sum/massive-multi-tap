@@ -4,7 +4,6 @@ var socket = io.connect(window.location.hostname + ':5555');
 
 $(function() {
 
-
     $('.button.click').on('click', function() {
         socket.emit('pad.button',{
             pad: {button: $(this).attr('id'), state: 'click' }
