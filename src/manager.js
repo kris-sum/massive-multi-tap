@@ -34,15 +34,17 @@ function Manager(optionsObj)
         // process the data on pad click
         socket.on('pad.button', function (data) {
             if (self.playerButtonsEnabled && player.buttonsEnabled) { 
-                console.log(socket.id + " " + player.name + " Pad: %j", data.pad);
+                // console.log(socket.id + " " + player.name + " Pad: %j", data.pad);
                 if (data.pad.state!='click') {
                     robot.keyToggle(data.pad.button, data.pad.state);
                 } else {
                     robot.keyTap(data.pad.button);
-                    console.log('press '+data.pad.button);
                 }
             }
         });
+
+        socket.join('players');
+        player.disableButtons();
 
         this.arrPlayers.push(player);
         return player;
@@ -50,7 +52,7 @@ function Manager(optionsObj)
 
     this.removeUser = function(socket) { 
 
-        // find the socket ID in the player array and remove their player
+        // find the socket ID in the player array and remove the player
         var found = -1;
         for (var i = 0; i<this.arrPlayers.length; i++) { 
             var tmpPlayer = this.arrPlayers[i];

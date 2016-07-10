@@ -19,8 +19,13 @@
 
 .button.down { background-color:#666; border-color:#ff0000;}
 
-.hidden { display:none; }
+#statusbar {
+    padding:0.25em 0.5em; 
+    background:#518EC2;
+    color:#fff;
+}
 
+#pad.disabled { opacity:0.1; }
 
 .form-signin
 {

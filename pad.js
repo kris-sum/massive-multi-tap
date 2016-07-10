@@ -9,15 +9,26 @@ var manager = new Manager();
 app.use('/', express.static(__dirname + '/public'));
 app.listen(80, function() { console.log('web listening on port 80')});
 
+// lobby functions
 
-function status() {
-    io.broadcast.emit('server-status', { 'sockets': io.engine.clientsCount, 'players' : Manager.getPlayers().length });
+function sendStatus() {
+    io.to('lobby').emit('server-status', 
+    { 
+        'sockets': io.engine.clientsCount, 
+        'players' : manager.getPlayers().length,
+        'time' : new Date().toJSON() 
+    });
 }
+
+// send current time every 10 secs
+setInterval(sendStatus, 1000);
 
 // socket.io stuff
 io.sockets.on('connection', function (socket) {
 
     console.log('Client connected ' + socket.id + ' from ' + socket.request.connection.remoteAddress);
+    // join the socket to the lobby so they can receive lobby events
+    socket.join('lobby');
 
     socket.on('register', function (data, fn) {
 
