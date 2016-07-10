@@ -13,6 +13,15 @@ $(function() {
         $('#statusbar span.time').html(time.getHours() + ':'+time.getMinutes()+':'+time.getSeconds());
     });
 
+    socket.on('302', function(data) { 
+        console.log(data);
+
+        if (window.location != data) {
+            socket.disconnect();
+            window.location = data;
+        }
+    });
+
     socket.on('update-ui', function(data) {
         player = data.player;
         if (player.buttonsEnabled == false)
@@ -22,31 +31,6 @@ $(function() {
             $('#pad').removeClass('disabled');
         }
     });
-
-    $('#register form').on('submit', function(event) {
-
-        event.preventDefault();
-        var playerName =  $('#register input.name').val();
-
-        if (playerName=='') {
-            $('#register .error').show('fast');
-            return false;
-        }
-
-        socket.emit(
-            'register', 
-            { user: { name : playerName } } ,
-            function(confirmation){ 
-                if (confirmation) { 
-                    $('#register').hide();
-                    $('#pad').show();
-                } else { 
-                    $('#register .error').show('fast');
-                }
-            });
-
-        return false;
-    })
 
     $('#pad .button.click').on('click', function() {
         if (player.buttonsEnabled == false) return; 

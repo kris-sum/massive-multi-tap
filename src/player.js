@@ -28,6 +28,11 @@ function Player(optionsObj)
         this.name = name;
         return this;
     }
+    
+    this.setSocket = function(socket) {
+        this.socket = socket;
+        return this;
+    }
     this.getSocket = function () {
         return this.socket;
     }
@@ -43,6 +48,14 @@ function Player(optionsObj)
 
         return data;
     }
+
+    this.loadFromJSON = function (json) {
+
+        var obj = JSON.parse(json);
+        this.name = obj.name;
+        return this;
+    }
+
     /**
      * Sends data to the client so the client can update it's UI state
      */

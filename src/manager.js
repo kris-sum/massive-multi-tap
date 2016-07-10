@@ -69,6 +69,14 @@ function Manager(optionsObj)
 
     };
 
+    /**
+     * Resurrect a player object that has been stored in the session store.
+     */
+    this.reconnectPlayer = function (socket, json) {
+
+        return this.addUser(socket, json.player);
+    }
+
 }
 
 module.exports = Manager;
