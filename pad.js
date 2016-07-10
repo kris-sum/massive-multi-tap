@@ -1,33 +1,44 @@
 var express = require('express');
 var app = express();
-var server = require('http').createServer(app);  
+var server = require('http').createServer(app);
 var io = require('socket.io').listen(server);
-var robot = require("robotjs");
+var Manager = require("./src/manager.js");
+var manager = new Manager();
 
 // web stuff
 app.use('/', express.static(__dirname + '/public'));
 app.listen(80, function() { console.log('web listening on port 80')});
 
+
+function status() {
+    io.broadcast.emit('server-status', { 'sockets': io.engine.clientsCount, 'players' : Manager.getPlayers().length });
+}
+
 // socket.io stuff
- 
 io.sockets.on('connection', function (socket) {
-    socket.user_id = 0; // current user ID
+
     console.log('Client connected ' + socket.id + ' from ' + socket.request.connection.remoteAddress);
 
-    socket.emit('welcome', {message: 'Welcome!'});
- 
-    // process the data
-    socket.on('pad.button', function (data) {
-       console.log("Pad: %j", data.pad);
+    socket.on('register', function (data, fn) {
 
-       if (data.pad.state!='click') {
-           robot.keyToggle(data.pad.button, data.pad.state);
-       } else {
-           robot.keyTap(data.pad.button);
-           console.log('press '+data.pad.button);
-       }
-       
+        var result = manager.addUser(socket, data.user);
+
+        if (result == false) {
+            console.log('Client ' + socket.id + ' trying to use username already in use ' + data.user.name);
+            fn(result);
+        } else { 
+            console.log('Client registered ' + socket.id + ' username ' + data.user.name);
+            fn(true);
+        }
+
     });
+
+    socket.on('disconnect', function () {
+        console.log('Client disconnected ' + socket.id);
+        manager.removeUser(socket);
+    });
+
 });
+
 
 server.listen(5555)

@@ -19,6 +19,34 @@
     <script src="pad-client.js"></script>
 </head>
 <body>
+
+    <div id="register" class=" container">
+        <div class="row">
+            <div class="col-sm-6 col-md-4 col-md-offset-4">
+                <h1 class="text-center login-title">Sign in to continue </h1>
+                <div class="account-wall">
+                    <!--
+                    <img class="profile-img" src="https://lh5.googleusercontent.com/-b0-k99FZlyE/AAAAAAAAAAI/AAAAAAAAAAA/eu7opA4byxI/photo.jpg?sz=120"
+                        alt="">
+                        -->
+                    <form class="form-signin">
+                    <input type="text" class="name form-control" placeholder="Name" required autofocus name="name">
+                    <p>&nbsp;</p>
+                    <button class="btn btn-lg btn-primary btn-block" type="submit">
+                        Connect</button>
+                    <!--
+                    <a href="#" class="pull-right need-help">Need help? </a><span class="clearfix"></span>
+                    -->
+                    <div class="error alert alert-warning" style="display:none";>Your name is already taken, please choose again.</div>
+                    </form>
+                </div>
+                <!--
+                <a href="#" class="text-center new-account">Create an account </a>
+                -->
+            </div>
+        </div>
+    </div>
+
     <!-- Snes9x 
      <div class="pad">
         <div id="up" class="button updown"><i class="fa fa-angle-up"></i></div>
@@ -33,17 +61,20 @@
         <div id="x" class="button toggle">X (run)</div>
      </div>
      -->
-     <div class="pad pull-right">
-        <div id="enter" class="button updown"><i class="fa fa-play-circle"></i></div>
-        <br/>
-        <div id="." class="button updown">A</div>
-        <div id="," class="button updown">B (jump)</div>
-     </div>
-     <div class="pad">
-        <div id="up" class="button updown"><i class="fa fa-angle-up"></i></div>
-        <div id="down" class="button updown"><i class="fa fa-angle-down"></i></div><br/>
-        <div id="left" class="button updown"><i class="fa fa-angle-left"></i></div>
-        <div id="right" class="button updown"><i class="fa fa-angle-right"></i></div>
+     <div id="pad" class="container" style="display:none;" >
+
+        <div class="pad pull-right">
+            <div id="home" class="button updown"><i class="fa fa-play-circle"></i></div>
+            <br/>
+            <div id="pagedown" class="button updown">B</div>
+            <div id="pageup" class="button updown">A (jump)</div>
+        </div>
+        <div class="pad">
+            <div id="up" class="button updown"><i class="fa fa-angle-up"></i></div>
+            <div id="down" class="button updown"><i class="fa fa-angle-down"></i></div><br/>
+            <div id="left" class="button updown"><i class="fa fa-angle-left"></i></div>
+            <div id="right" class="button updown"><i class="fa fa-angle-right"></i></div>
+        </div>
      </div>
 </body> 
 </html>
