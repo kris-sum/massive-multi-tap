@@ -24,6 +24,12 @@
     background:#518EC2;
     color:#fff;
 }
+#statusbar.disconnected {
+    background-image: linear-gradient(45deg,rgba(255,255,255,.15) 25%,transparent 25%,transparent 50%,rgba(255,255,255,.15) 50%,rgba(255,255,255,.15) 75%,transparent 75%,transparent);
+    background-color: #d9534f;
+    background-size: 40px 40px;
+    animation: progress-bar-stripes 2s linear infinite;
+}
 
 #pad.disabled { opacity:0.1; }
 

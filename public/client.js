@@ -12,6 +12,9 @@ $(function() {
         var time = new Date(data.time);
         $('#statusbar span.time').html(time.getHours() + ':'+time.getMinutes()+':'+time.getSeconds());
     });
+    socket.on('errormsg', function(data) { 
+        $('#statusbar .error').show().html(data);
+    });
 
     socket.on('302', function(data) { 
         /*
@@ -35,6 +38,13 @@ $(function() {
         } else {
             $('#pad').removeClass('disabled');
         }
+    });
+    socket.on('connect', function(data) {
+       $('#statusbar').removeClass('disconnected'); 
+    });
+
+    socket.on('disconnect', function(data) {
+       $('#statusbar').addClass('disconnected'); 
     });
 
 });

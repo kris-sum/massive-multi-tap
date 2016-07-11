@@ -1,5 +1,8 @@
 $(function() {
     
+    // unbind previously bound events (prevents duplication if the page gets reloaded)
+    $('#pad .button.click, #pad .button.updown, #pad.button.toggle').off();
+
     $('#pad .button.click').on('click', function() {
         if (player.buttonsEnabled == false) return; 
         socket.emit('pad.button',{

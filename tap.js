@@ -18,6 +18,7 @@ app.use(session(sessionConfig));
 // app code
 var Manager = require("./src/manager.js");
 var manager = new Manager();
+manager.init(io);
 
 // web stuff
 app.get('/', function (req, res) {
@@ -25,28 +26,6 @@ app.get('/', function (req, res) {
 });
 app.use('/', express.static(__dirname + '/public'));
 app.listen(80, function() { console.log('web listening on port 80')});
-
-// lobby functions
-
-function sendStatus() {
-    io.to('lobby').emit('server-status', 
-    { 
-        'sockets': io.engine.clientsCount, 
-        'players' : manager.getPlayers().length,
-        'time' : new Date().toJSON() 
-    });
-}
-/**
- * Send a new HTML page fragment down to the client
- */
-function sendPage(filename, socket) {
-    fs.readFile(__dirname + '/public/' + filename , "utf-8", function (err, data){
-        socket.emit('load',data);
-    });
-}
-
-// send current time every 10 secs
-setInterval(sendStatus, 1000);
 
 // socket.io stuff
 io.sockets.on('connection', function (socket) {
@@ -59,13 +38,11 @@ io.sockets.on('connection', function (socket) {
     } else {
         var player = manager.reconnectPlayer(socket, socket.handshake.session.player);
         if (player) { 
-            console.log('Client re-connected ' + player.name + ' from ' + socket.request.connection.remoteAddress);
-            sendPage('lobby/index.html', player.getSocket());
+            console.log('Re-connected ' + player.name + ' from ' + socket.request.connection.remoteAddress);
         } else { 
-            console.log('error');
-            sendPage('error.html', socket);
-        }
-        
+            console.log('error reconnecting client');
+            socket.emit('errormsg', 'Sorry, was unable to reconnect you to your session. Please clear your cookies.');
+        }        
     }
     
     // join the socket to the lobby so they can receive lobby events
