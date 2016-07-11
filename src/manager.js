@@ -70,8 +70,7 @@ function Manager(optionsObj)
             return admin;
         } else { 
 
-            var player = new Player();
-            player.init(socket);
+            var player = new Player(socket);
             player.setName(user.name);
 
             this.bindListeners(player);

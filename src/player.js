@@ -1,45 +1,42 @@
+"use strict";
 var fs = require('fs');
 
-var Player = Player || {};
-function Player(optionsObj)
-{
-    this.buttonsEnabled = true;
-    this.name = '';
-    this.socket = null;
-    
-    this.init = function (socket) { 
+class Player {
+     constructor(socket) {
+        this.buttonsEnabled = true;
+        this.name = '';
         this.socket = socket;
     }
-
-    this.enableButtons = function () {
+    
+    enableButtons() {
         this.buttonsEnabled = true;
         this.updateClient();
         return this;
     }
 
-    this.disableButtons = function () {
+    disableButtons() {
         this.buttonsEnabled = false;
         this.updateClient();
         return this;
     }
 
-    this.getName = function() {
+    getName() {
         return this.name;
     }
-    this.setName = function (name) { 
+    setName(name) { 
         this.name = name;
         return this;
     }
     
-    this.setSocket = function(socket) {
+    setSocket(socket) {
         this.socket = socket;
         return this;
     }
-    this.getSocket = function () {
+    getSocket() {
         return this.socket;
     }
 
-    this.getJSON = function () {
+    getJSON() {
         var data = {};
 
         var obj = {}
@@ -51,7 +48,7 @@ function Player(optionsObj)
         return data;
     }
 
-    this.loadFromJSON = function (json) {
+    loadFromJSON(json) {
 
         var obj = JSON.parse(json);
         this.name = obj.name;
@@ -61,11 +58,11 @@ function Player(optionsObj)
     /**
      * Sends data to the client so the client can update it's UI state
      */
-    this.updateClient = function () {
+    updateClient() {
         this.socket.emit('update-ui', this.getJSON());
     };
 
-    this.sendPage = function(filename) {
+    sendPage(filename) {
         var self = this;
         fs.readFile(__dirname + '/../public/' + filename , "utf-8", function (err, data){
             if (err) console.log(err);
