@@ -1,3 +1,5 @@
+var fs = require('fs');
+
 var Player = Player || {};
 function Player(optionsObj)
 {
@@ -54,16 +56,24 @@ function Player(optionsObj)
         var obj = JSON.parse(json);
         this.name = obj.name;
         return this;
-    }
+    };
 
     /**
      * Sends data to the client so the client can update it's UI state
      */
     this.updateClient = function () {
         this.socket.emit('update-ui', this.getJSON());
-    }
+    };
 
-}
+    this.sendPage = function(filename) {
+        var self = this;
+        fs.readFile(__dirname + '/../public/' + filename , "utf-8", function (err, data){
+            if (err) console.log(err);
+            self.socket.emit('load', data);
+        });
+    };
+
+};
 
 
 module.exports = Player;

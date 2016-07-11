@@ -31,10 +31,31 @@ function Manager(optionsObj)
         player.init(socket);
         player.setName(user.name);
 
+        this.bindListeners(player);
+
+        socket.join('players');
+        player.disableButtons();
+
+        this.arrPlayers.push(player);
+        return player;
+    };
+
+    /** 
+     * bind all listen events for the socket
+     */
+    this.bindListeners = function(player) {
+        
+        var self = this;
+
+        player.getSocket().on('joingame', function(data) {
+            player.enableButtons();
+            player.sendPage('game1/index.html');
+        });
+
         // process the data on pad click
-        socket.on('pad.button', function (data) {
+        player.getSocket().on('pad.button', function (data) {
             if (self.playerButtonsEnabled && player.buttonsEnabled) { 
-                // console.log(socket.id + " " + player.name + " Pad: %j", data.pad);
+                console.log(player.getSocket().id + " " + player.name + " Pad: %j", data.pad);
                 if (data.pad.state!='click') {
                     robot.keyToggle(data.pad.button, data.pad.state);
                 } else {
@@ -43,12 +64,7 @@ function Manager(optionsObj)
             }
         });
 
-        socket.join('players');
-        player.disableButtons();
-
-        this.arrPlayers.push(player);
-        return player;
-    };
+    }
 
     this.removeUser = function(socket) { 
 

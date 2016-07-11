@@ -1,5 +1,6 @@
 var express = require('express');
 var app = express();
+var fs = require('fs');
 var server = require('http').createServer(app);
 var io = require('socket.io').listen(server);
 
@@ -35,6 +36,14 @@ function sendStatus() {
         'time' : new Date().toJSON() 
     });
 }
+/**
+ * Send a new HTML page fragment down to the client
+ */
+function sendPage(filename, socket) {
+    fs.readFile(__dirname + '/public/' + filename , "utf-8", function (err, data){
+        socket.emit('load',data);
+    });
+}
 
 // send current time every 10 secs
 setInterval(sendStatus, 1000);
@@ -43,7 +52,7 @@ setInterval(sendStatus, 1000);
 io.sockets.on('connection', function (socket) {
 
     console.log('Client connected - processing');
-    console.log(socket.handshake.session);
+    //console.log(socket.handshake.session);
     
     if (!socket.handshake.session.player) {
         console.log('Client connected ' + socket.id + ' from ' + socket.request.connection.remoteAddress);
@@ -51,10 +60,10 @@ io.sockets.on('connection', function (socket) {
         var player = manager.reconnectPlayer(socket, socket.handshake.session.player);
         if (player) { 
             console.log('Client re-connected ' + player.name + ' from ' + socket.request.connection.remoteAddress);
-            player.getSocket().emit('302','/lobby');  
-            player.updateClient();
+            sendPage('lobby/index.html', player.getSocket());
         } else { 
-            socket.emit('302','/error');
+            console.log('error');
+            sendPage('error.html', socket);
         }
         
     }
