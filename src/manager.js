@@ -3,29 +3,22 @@ var robot = require("robotjs");
 var Player = require("./player.js");
 var Admin = require("./admin.js");
 
-var Manager = Manager || {};
-function Manager(optionsObj)
-{
-
-    this.playerButtonsEnabled = true;
-    this.arrPlayers = [];
-
-    this.arrPlayersInControl = [];
-
-    this.io;
-
-    this.init = function (io) {
-        console.log('Manager init');
+class Manager {
+    
+    constructor(io) {
+        
         this.io = io;
 
-        var self=this;
+        this.playerButtonsEnabled = true;
+        this.arrPlayers = [];
+        this.arrPlayersInControl = [];
 
+        var self=this;
         setInterval(function() { self._sendStatus(); } , 1000);
         
     }
 
-        
-    this._sendStatus = function () {
+    _sendStatus() {
 
         var serverstatus = { 
             'sockets': this.io.engine.clientsCount, 
@@ -39,14 +32,14 @@ function Manager(optionsObj)
         
     }
 
-    this.getPlayers = function () {
+    getPlayers() {
         return this.arrPlayers;
     }
 
     /**
      * Add a user to the game - sets up a Player object and adds them to arrPlayers
      */
-    this.addUser = function (socket, user) {
+    addUser(socket, user) {
 
         var self = this;
 
@@ -58,27 +51,32 @@ function Manager(optionsObj)
             }
         }
 
-                
-        if (user.nane=='admin') { 
-            var admin = new Admin();
-            admin.init(socket);
+        if (user.name=='admin') { 
+            var admin = new Admin(socket);
             admin.setName(user.name);
-            this.bindListeners(admin);
-            this.bindAdminListeners(admin);
+            this._bindListeners(admin);
 
             socket.join('admins');
+            
+            // redirect them to a lobby page
+            admin.sendPage('admin/index.html');
+
             return admin;
         } else { 
 
             var player = new Player(socket);
             player.setName(user.name);
 
-            this.bindListeners(player);
+            this._bindListeners(player);
 
             socket.join('players');
             player.disableButtons();
 
             this.arrPlayers.push(player);
+
+            // redirect them to a lobby page
+            player.sendPage('lobby/index.html');
+
             return player;
         }
     };
@@ -86,7 +84,7 @@ function Manager(optionsObj)
     /** 
      * bind all listen events for the socket
      */
-    this.bindListeners = function(player) {
+    _bindListeners(player) {
         
         var self = this;
 
@@ -97,9 +95,15 @@ function Manager(optionsObj)
             self.handlePadData(player, data);
         });
 
+        if (player instanceof Admin) {
+            player.getSocket().on('get-player-list', function() {
+                self.getPlayerList(player);
+            });
+        }
+
     }
 
-    this.removeUser = function(socket) { 
+    removeUser(socket) { 
 
         // find the socket ID in the player array and remove the player
         var found = -1;
@@ -121,16 +125,13 @@ function Manager(optionsObj)
     /**
      * Resurrect a player object that has been stored in the session store.
      */
-    this.reconnectPlayer = function (socket, json) {
+    reconnectPlayer(socket, json) {
         var result = this.addUser(socket, json.player);
-        if (result) {
-            // redirect them to a lobby page
-            result.sendPage('lobby/index.html');
-        }
+
         return result;
     };
 
-    this.handleJoinGameRequest = function (player, data) {
+    handleJoinGameRequest(player, data) {
 
         // add to playersInControl array , if not already in there
         var found = -1;
@@ -148,7 +149,7 @@ function Manager(optionsObj)
         player.sendPage('game1/index.html');
     };
 
-    this.handlePadData = function (player, data) {
+    handlePadData(player, data) {
         if (this.playerButtonsEnabled && player.buttonsEnabled) { 
             console.log(player.getSocket().id + " " + player.name + " Pad: %j", data.pad);
             if (data.pad.state!='click') {
@@ -158,6 +159,14 @@ function Manager(optionsObj)
             }
         }
     };
+
+    getPlayerList(player) {
+        var players = [];
+        for (var i=0;i<this.arrPlayers.length;i++) { 
+            players.push(this.arrPlayers[i].getJSON());
+        }
+        player.getSocket().emit('player-list',{ 'players': players});
+    }
 
 };
 

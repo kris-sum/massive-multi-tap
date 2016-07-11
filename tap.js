@@ -17,8 +17,7 @@ app.use(session(sessionConfig));
 
 // app code
 var Manager = require("./src/manager.js");
-var manager = new Manager();
-manager.init(io);
+var manager = new Manager(io);
 
 // web stuff
 app.get('/', function (req, res) {

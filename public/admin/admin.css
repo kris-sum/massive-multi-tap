@@ -1,0 +1,16 @@
+div.row > div h2 {
+    color:#999; 
+    border-bottom:2px solid #999;
+    margin:0px;
+    padding:0px;
+}
+
+div.player { 
+    border-radius:5px;
+    background:#eee;
+    float:left;
+    width:10em;
+    margin-right:1em;
+    min-height:5em;
+}
+

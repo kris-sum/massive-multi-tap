@@ -42,6 +42,7 @@ class Player {
         var obj = {}
         obj.name = this.name;
         obj.buttonsEnabled = this.buttonsEnabled;
+        obj.socketid = this.socket.id;
 
         data.player = obj;
 
