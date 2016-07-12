@@ -12,5 +12,13 @@ div.player {
     width:10em;
     margin-right:1em;
     min-height:5em;
+    text-align:center;
+    padding:0.25em;
+    margin-top:0.5em;
+    margin-bottom:0.5em;
 }
 
+div.player h3 { 
+    text-align:center; 
+    font-size:110%;
+}

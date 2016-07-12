@@ -16,8 +16,9 @@
                                   not supported by any browser */
 }
 .button i { line-height: inherit; font-size:400%; font-weight:bold; }
-
 .button.down { background-color:#666; border-color:#ff0000;}
+
+.clear { clear:both; }
 
 #statusbar {
     padding:0.25em 0.5em; 
