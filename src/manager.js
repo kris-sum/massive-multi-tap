@@ -102,29 +102,44 @@ class Manager {
         if (player instanceof Admin) {
 
             player.getSocket().on('get-player-list', function() {
-                self.getPlayerList(player);
+                self.sendPlayerList(player);
+                // potentially not good due to async - may need to refactor this
+                for (var i = 0; i<self.arrPlayersInControl.length; i++) {
+                    self.io.to('admins').emit('player-activated', self.arrPlayersInControl[i].getJSON()); 
+                } 
+                
             });
 
-            player.getSocket().on('player-enable-pad', function(data, fn) {
+            player.getSocket().on('player-enable-pad', function(data) {
                 var player = self._getPlayerBySocketId(data.socketid);
                 if (!player) {
                     console.log('Unable to find player ' + data.socketid);
-                    fn(false);
                     return;
                 } 
                 player.enableButtons();
-                fn(true);
+                self.io.to('admins').emit('player-activated', player.getJSON());
+                self.arrPlayersInControl.push(player);
             });
 
-            player.getSocket().on('player-disable-pad', function(data, fn) {
+            player.getSocket().on('player-disable-pad', function(data) {
                 var player = self._getPlayerBySocketId(data.socketid);
                 if (!player) {
                     console.log('Unable to find player ' + data.socketid);
-                    fn(false);
                     return;
                 } 
                 player.disableButtons();
-                fn(true);
+                self.io.to('admins').emit('player-deactivated', player.getJSON());
+
+                var found=-1;
+                for (var i = 0; i<self.arrPlayersInControl.length; i++) {
+                    if (self.arrPlayersInControl[i].socketid == player.socketid) 
+                    found=i;
+                }
+                if (found>-1) {
+                    self.arrPlayersInControl.splice(found,1);
+                }
+
+               
             });            
         }
 
@@ -202,7 +217,7 @@ class Manager {
         }
     };
 
-    getPlayerList(player) {
+    sendPlayerList(player) {
         var players = [];
         for (var i=0;i<this.arrPlayers.length;i++) { 
             players.push(this.arrPlayers[i].getJSON());

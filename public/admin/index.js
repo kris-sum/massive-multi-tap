@@ -21,20 +21,40 @@ $(function() {
 	    removePlayer(data.player);
     });
 
-    $('#content').on('click', '.player .enablePad', function() {
+    socket.on('player-activated', function(data) {
+
+        var playerDiv = $('#player-list').find('.player[id="'+data.player.socketid+'"]');
+
+        if (playerDiv) {
+            $(playerDiv).find('button.pad.pad-disabled').hide();
+            $(playerDiv).find('button.pad.pad-enabled').show();
+            $(playerDiv).appendTo('#active-player-list');
+        }
+
+    });
+
+    socket.on('player-deactivated', function(data) { 
+
+        var playerDiv = $('#active-player-list').find('.player[id="'+data.player.socketid+'"]');
+
+        if (playerDiv) {
+            $(playerDiv).find('button.pad.pad-disabled').show();
+            $(playerDiv).find('button.pad.pad-enabled').hide();
+            $(playerDiv).appendTo('#player-list');
+        }
+
+                   
+    });
+
+    $('#content').on('click', '.player button.pad', function() {
         var socketid = $(this).closest('div').attr('id');
         var button = this;
 
-        if ($(this).hasClass('enabled')) { 
-            socket.emit('player-disable-pad', { 'socketid' : socketid }, function(confirmation) {
-                $(button).addClass('btn-primary').removeClass('enabled btn-success').find('i').removeClass('fa-circle-o-notch fa-spin').addClass('fa-pause');
-            });
+        if ($(this).hasClass('pad-enabled')) { 
+            socket.emit('player-disable-pad', { 'socketid' : socketid });
         } else { 
-            socket.emit('player-enable-pad', { 'socketid' : socketid }, function(confirmation) {
-                $(button).removeClass('btn-primary').addClass('enabled btn-success').find('i').addClass('fa-circle-o-notch fa-spin').removeClass('fa-pause');
-            });
+            socket.emit('player-enable-pad', { 'socketid' : socketid });
         }
-
 
     });
     
@@ -49,7 +69,7 @@ function addPlayer(player, animated) {
     $(playerHTML).find('.name').html(player.name);
     $(playerHTML).attr('id',player.socketid);
     $(playerHTML).removeClass('template');
-    $(playerHTML).appendTo('div.players');
+    $(playerHTML).appendTo('#player-list');
 
     if (animated) { 
         $(playerHTML).show('slow');
