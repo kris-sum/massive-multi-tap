@@ -17,8 +17,36 @@ div.player {
     margin-top:0.5em;
     margin-bottom:0.5em;
 }
+.dashboard div.player { 
+    background:none;
+    min-height:0px;
+    text-align:left;
+}
+.dashboard #active-player-list div.player,
+.dashboard #next-player-list div.player { 
+    font-size:200%; 
+    float:none;
+    width:100%;
+    margin-left:0px;margin-right:0px;
+    display:block;
+}
+.dashboard #active-player-list div.player {
+    background-color:#55BF42;
+    color:#fff;
+}
+.dashboard #next-player-list div.player { 
+    background-color:#eee;
+}
 
 div.player h3 { 
     text-align:center; 
     font-size:110%;
+}
+
+div#timeleft {
+    color:#ff0000;
+    margin:0.25em;
+    text-align:center; 
+    font-size:400%;
+    font-weight:bold;
 }

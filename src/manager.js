@@ -12,7 +12,14 @@ class Manager {
         this.playerButtonsEnabled = true;
         this.arrPlayers = [];
         this.arrPlayersInControl = [];
+        this.arrPlayersUpNext = [];
+        this.arrPlayersPlayed = [];                     // players who have played get put in this pool
 
+        this.cycleGame = 'game1/nes1';                // game file to cycle into play
+        this.cycleTime = 30;
+        this.cycleTimeLeft = 30;
+        this.autoCycleEnabled = false;
+        
         var self=this;
         setInterval(function() { self._sendStatus(); } , 1000);
         
@@ -105,7 +112,7 @@ class Manager {
                 self.sendPlayerList(player);
                 // potentially not good due to async - may need to refactor this
                 for (var i = 0; i<self.arrPlayersInControl.length; i++) {
-                    self.io.to('admins').emit('player-activated', self.arrPlayersInControl[i].getJSON()); 
+                    self.io.to('admins').to('dashboard').emit('player-activated', self.arrPlayersInControl[i].getJSON());
                 } 
                 
             });
@@ -117,7 +124,7 @@ class Manager {
                     return;
                 } 
                 player.enableButtons();
-                self.io.to('admins').emit('player-activated', player.getJSON());
+                self.io.to('admins').to('dashboard').emit('player-activated', player.getJSON());
                 self.arrPlayersInControl.push(player);
             });
 
@@ -128,7 +135,7 @@ class Manager {
                     return;
                 } 
                 player.disableButtons();
-                self.io.to('admins').emit('player-deactivated', player.getJSON());
+                self.io.to('admins').to('dashboard').emit('player-deactivated', player.getJSON());
 
                 var found=-1;
                 for (var i = 0; i<self.arrPlayersInControl.length; i++) {
@@ -139,8 +146,18 @@ class Manager {
                     self.arrPlayersInControl.splice(found,1);
                 }
 
-               
             });            
+
+            player.getSocket().on('admin-loadpage', function(data) {
+               player.sendPage(data.page);
+            });
+
+            player.getSocket().on('cycle-start', function(data) {
+                self.cycleGame = data.game;
+                self.startCycle();
+            });
+
+
         }
 
     }
@@ -222,7 +239,106 @@ class Manager {
         for (var i=0;i<this.arrPlayers.length;i++) { 
             players.push(this.arrPlayers[i].getJSON());
         }
+        for (var i=0;i<this.arrPlayersPlayed.length;i++) { 
+            players.push(this.arrPlayersPlayed[i].getJSON());
+        }
         player.getSocket().emit('player-list',{ 'players': players});
+        var players = [];
+        for (var i=0;i<this.arrPlayersInControl.length;i++) { 
+            players.push(this.arrPlayersInControl[i].getJSON());
+        }
+        player.getSocket().emit('active-player-list',{ 'players': players});
+        var players = [];
+        for (var i=0;i<this.arrPlayersUpNext.length;i++) { 
+            players.push(this.arrPlayersUpNext[i].getJSON());
+        }
+        player.getSocket().emit('next-player-list',{ 'players': players});
+    }
+
+    startCycle() {
+
+        if (this.autoCycleEnabled == true) return;
+
+        var self = this;
+        
+        this.cycleTimeLeft = this.cycleTime;
+        this.autoCycleEnabled = true;
+
+        // reset all players to general pool
+        while (this.arrPlayersInControl.length>0) {
+            this.arrPlayers.push( this.arrPlayersInControl.pop() );
+        }
+        while (this.arrPlayersUpNext.length>0) {
+            this.arrPlayers.push( this.arrPlayersUpNext.pop() );
+        }
+
+        // pick two at random to play now
+        if (this.arrPlayers.length>0) {
+            var player = this.arrPlayers.splice(Math.floor(Math.random() * this.arrPlayers.length ),1)[0];
+            player.sendPage(this.cycleGame+'_p1.html');
+            player.enableButtons();
+            this.arrPlayersInControl.push(player);
+            this.io.to('admins').to('dashboard').emit('player-activated', player.getJSON());
+        }
+
+        if (this.arrPlayers.length>0) {
+            var player = this.arrPlayers.splice(Math.floor(Math.random() * this.arrPlayers.length ),1)[0];
+            player.sendPage(this.cycleGame+'_p2.html');
+            player.enableButtons();
+            this.arrPlayersInControl.push(player);
+            this.io.to('admins').to('dashboard').emit('player-activated', player.getJSON());
+        }
+        // pick two to add to the next pool
+        if (this.arrPlayers.length>0) {
+            var player = this.arrPlayers.splice(Math.floor(Math.random() * this.arrPlayers.length ),1)[0];
+            this.arrPlayersUpNext.push(player);
+        }
+        if (this.arrPlayers.length>0) {
+            var player = this.arrPlayers.splice(Math.floor(Math.random() * this.arrPlayers.length ),1)[0];
+            this.arrPlayersUpNext.push(player);
+        }
+        
+        // start timer
+        setTimeout(function() { self.updateCycleTimer(); } , 1000);
+    }
+
+    updateCycleTimer() {
+        this.cycleTimeLeft--;
+        var self = this;
+        console.log(this.cycleTimeLeft);
+        if (this.cycleTimeLeft<0) {
+            this.advanceCycle();
+        } else { 
+            this.io.to('admins').to('dashboard').emit('update-dashboard', {'cycleTimeLeft': this.cycleTimeLeft } );
+            setTimeout(function() { self.updateCycleTimer(); } , 1000);
+        }
+
+       
+    }
+
+    advanceCycle() {
+
+        // move currrent active to the 'played' pool
+        while (this.arrPlayersInControl.length>0) {
+            var player =  this.arrPlayersInControl.pop();
+            this.arrPlayersPlayed.push(player);
+            this.io.to('admins').to('dashboard').emit('player-deactivated', player.getJSON());
+            player.sendPage('lobby/index.html');
+        }
+
+        while (this.arrPlayersUpNext.length>0) {
+            var player =  this.arrPlayersUpNext.pop();
+            player.sendPage(this.cycleGame+'_p1.html');
+            player.enableButtons();
+            this.arrPlayersInControl.push(player);
+            this.io.to('admins').to('dashboard').emit('player-activated', player.getJSON());
+        }
+
+        // pick two more
+
+
+        this.cycleTimeLeft = this.cycleTime;
+
     }
 
 };

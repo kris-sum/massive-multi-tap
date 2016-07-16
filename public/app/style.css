@@ -15,8 +15,15 @@
   user-select: none;           /* Non-prefixed version, currently
                                   not supported by any browser */
 }
+.pad .button.start {
+    height:50px; width:50px; line-height:50px;
+}
+.pad .button.start i {
+    font-size:200%;
+}
 .button i { line-height: inherit; font-size:400%; font-weight:bold; }
 .button.down { background-color:#666; border-color:#ff0000;}
+.button.disabled { opacity:0; }
 
 .clear { clear:both; }
 
