@@ -25,6 +25,7 @@ $(function() {
     });
     socket.on('load', function(data) { 
         $('#content').html(data);
+        window.navigator.vibrate([100,50,100]);
     });
 
     socket.on('update-ui', function(data) {

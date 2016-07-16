@@ -10,7 +10,9 @@ $(function() {
     socket.removeListener('next-player-list');
 
     socket.on('player-list', function(data) { 
-       for (var i=0; i<data.players.length; i++) {
+
+        $('#player-list .player:not(.template)').remove();
+        for (var i=0; i<data.players.length; i++) {
            var player = data.players[i].player;
            addPlayer(player,false,'#player-list');
        };
@@ -18,20 +20,23 @@ $(function() {
     });
 
     socket.on('active-player-list', function(data) { 
-       for (var i=0; i<data.players.length; i++) {
-           var player = data.players[i].player;
-           addPlayer(player,false, '#active-player-list');
-       };
+
+        $('#active-player-list .player:not(.template)').remove();
+        for (var i=0; i<data.players.length; i++) {
+            var player = data.players[i].player;
+            addPlayer(player,false, '#active-player-list');
+        };
 
     });
 
 
     socket.on('next-player-list', function(data) { 
 
-       for (var i=0; i<data.players.length; i++) {
-           var player = data.players[i].player;
-           addPlayer(player,false, '#next-player-list');
-       };
+        $('#next-player-list .player:not(.template)').remove();
+        for (var i=0; i<data.players.length; i++) {
+            var player = data.players[i].player;
+            addPlayer(player,false, '#next-player-list');
+        };
 
     });
 
@@ -96,7 +101,9 @@ $(function() {
     $('#content').on('click', '#cycle-start', function() {
         socket.emit('cycle-start', { 'game' : 'game1/nes1' });
     });
- 
+     $('#content').on('click', '#cycle-reset', function() {
+        socket.emit('cycle-reset');
+    });
 });
 
 function addPlayer(player, animated, destination) {

@@ -2,6 +2,7 @@
 var robot = require("robotjs");
 var Player = require("./player.js");
 var Admin = require("./admin.js");
+var fs = require('fs');
 
 class Manager {
     
@@ -16,8 +17,8 @@ class Manager {
         this.arrPlayersPlayed = [];                     // players who have played get put in this pool
 
         this.cycleGame = 'game1/nes1';                // game file to cycle into play
-        this.cycleTime = 30;
-        this.cycleTimeLeft = 30;
+        this.cycleTime = 10;
+        this.cycleTimeLeft = 20;
         this.autoCycleEnabled = false;
         
         var self=this;
@@ -29,7 +30,7 @@ class Manager {
 
         var serverstatus = { 
             'sockets': this.io.engine.clientsCount, 
-            'players' : this.getPlayers().length,
+            'players' : this.getPlayerCount(),
             'time' : new Date().toJSON() 
         };
 
@@ -39,8 +40,8 @@ class Manager {
         
     }
 
-    getPlayers() {
-        return this.arrPlayers;
+    getPlayerCount() {
+        return this.arrPlayers.length + this.arrPlayersInControl.length + this.arrPlayersUpNext.length + this.arrPlayersPlayed.length;
     }
 
     /**
@@ -156,7 +157,12 @@ class Manager {
                 self.cycleGame = data.game;
                 self.startCycle();
             });
-
+            player.getSocket().on('cycle-reset', function() {
+                self.autoCycleEnabled = false;
+                self.resetPlayers();
+                self.sendAllPlayerToLobby();
+                self.emitPlayerList();
+            });
 
         }
 
@@ -255,6 +261,28 @@ class Manager {
         player.getSocket().emit('next-player-list',{ 'players': players});
     }
 
+    // send out updated player list to admins and dash
+    emitPlayerList() {
+        var players = [];
+        for (var i=0;i<this.arrPlayers.length;i++) { 
+            players.push(this.arrPlayers[i].getJSON());
+        }
+        for (var i=0;i<this.arrPlayersPlayed.length;i++) { 
+            players.push(this.arrPlayersPlayed[i].getJSON());
+        }
+        this.io.to('admins').to('dashboard').emit('player-list',{ 'players': players});
+        var players = [];
+        for (var i=0;i<this.arrPlayersInControl.length;i++) { 
+            players.push(this.arrPlayersInControl[i].getJSON());
+        }
+        this.io.to('admins').to('dashboard').emit('active-player-list',{ 'players': players});
+        var players = [];
+        for (var i=0;i<this.arrPlayersUpNext.length;i++) { 
+            players.push(this.arrPlayersUpNext[i].getJSON());
+        }
+        this.io.to('admins').to('dashboard').emit('next-player-list',{ 'players': players});
+    }
+
     startCycle() {
 
         if (this.autoCycleEnabled == true) return;
@@ -265,12 +293,7 @@ class Manager {
         this.autoCycleEnabled = true;
 
         // reset all players to general pool
-        while (this.arrPlayersInControl.length>0) {
-            this.arrPlayers.push( this.arrPlayersInControl.pop() );
-        }
-        while (this.arrPlayersUpNext.length>0) {
-            this.arrPlayers.push( this.arrPlayersUpNext.pop() );
-        }
+        this.resetPlayers();
 
         // pick two at random to play now
         if (this.arrPlayers.length>0) {
@@ -278,7 +301,6 @@ class Manager {
             player.sendPage(this.cycleGame+'_p1.html');
             player.enableButtons();
             this.arrPlayersInControl.push(player);
-            this.io.to('admins').to('dashboard').emit('player-activated', player.getJSON());
         }
 
         if (this.arrPlayers.length>0) {
@@ -286,7 +308,6 @@ class Manager {
             player.sendPage(this.cycleGame+'_p2.html');
             player.enableButtons();
             this.arrPlayersInControl.push(player);
-            this.io.to('admins').to('dashboard').emit('player-activated', player.getJSON());
         }
         // pick two to add to the next pool
         if (this.arrPlayers.length>0) {
@@ -298,11 +319,33 @@ class Manager {
             this.arrPlayersUpNext.push(player);
         }
         
+        this.emitPlayerList();
+
         // start timer
         setTimeout(function() { self.updateCycleTimer(); } , 1000);
     }
 
+    resetPlayers() {
+        
+        while (this.arrPlayersInControl.length>0) {
+            this.arrPlayers.push( this.arrPlayersInControl.pop() );
+        }
+        while (this.arrPlayersUpNext.length>0) {
+            this.arrPlayers.push( this.arrPlayersUpNext.pop() );
+        }
+        while (this.arrPlayersPlayed.length>0) {
+            this.arrPlayers.push( this.arrPlayersPlayed.pop() );
+        }
+
+        this.arrPlayers.forEach(function(player) {
+            player.disableButtons();
+        });
+
+    }
+
     updateCycleTimer() {
+        if (this.autoCycleEnabled == false) return;
+
         this.cycleTimeLeft--;
         var self = this;
         console.log(this.cycleTimeLeft);
@@ -317,28 +360,68 @@ class Manager {
     }
 
     advanceCycle() {
+        
+        var self = this;
+        self.resetKeyboardState();
 
         // move currrent active to the 'played' pool
         while (this.arrPlayersInControl.length>0) {
             var player =  this.arrPlayersInControl.pop();
             this.arrPlayersPlayed.push(player);
             this.io.to('admins').to('dashboard').emit('player-deactivated', player.getJSON());
-            player.sendPage('lobby/index.html');
+            if (this.arrPlayersUpNext.length != 0) { 
+                player.sendPage('lobby/index.html');
+            }
         }
 
+        if (this.arrPlayersUpNext.length == 0) { 
+            this.autoCycleEnabled = false;
+
+            this.sendAllPlayerToLobby();
+            this.emitPlayerList();
+            return;
+        }
+
+        var pcount = 1;
         while (this.arrPlayersUpNext.length>0) {
             var player =  this.arrPlayersUpNext.pop();
-            player.sendPage(this.cycleGame+'_p1.html');
+            player.sendPage(this.cycleGame+'_p' + pcount + '.html');
             player.enableButtons();
             this.arrPlayersInControl.push(player);
-            this.io.to('admins').to('dashboard').emit('player-activated', player.getJSON());
+            pcount++;
         }
 
-        // pick two more
-
+        // pick two to add to the next pool
+        if (this.arrPlayers.length>0) {
+            var player = this.arrPlayers.splice(Math.floor(Math.random() * this.arrPlayers.length ),1)[0];
+            this.arrPlayersUpNext.push(player);
+        }
+        if (this.arrPlayers.length>0) {
+            var player = this.arrPlayers.splice(Math.floor(Math.random() * this.arrPlayers.length ),1)[0];
+            this.arrPlayersUpNext.push(player);
+        }
 
         this.cycleTimeLeft = this.cycleTime;
+        this.emitPlayerList();
 
+        // start timer
+        setTimeout(function() { self.updateCycleTimer(); } , 1000);
+
+    }
+
+    resetKeyboardState() {
+        var keys = ['up','down','left','right','pagedown','pageup','home'];
+        keys.forEach(function(value) {
+            robot.keyToggle(value, 'up');
+        });
+    }
+
+    sendAllPlayerToLobby() {
+        var self = this;
+        fs.readFile(__dirname + '/../public/lobby/index.html' , "utf-8", function (err, data){
+            if (err) console.log(err);
+                self.io.to('players').emit('load', data);
+        });
     }
 
 };

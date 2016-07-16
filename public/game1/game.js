@@ -5,6 +5,8 @@ $(function() {
 
     $('#pad .button.click').on('click', function() {
         if (player.buttonsEnabled == false) return; 
+        
+        window.navigator.vibrate(50);
         socket.emit('pad.button',{
             pad: {button: $(this).attr('id'), state: 'click' }
         });
@@ -14,6 +16,7 @@ $(function() {
         if (player.buttonsEnabled == false) return; 
         // check to see if we're not already 'down'
         if ($(this).hasClass('down')) return;
+        window.navigator.vibrate(50);
         socket.emit('pad.button',{
             pad: {button: $(this).attr('id'), state: 'down' }
         });
@@ -22,6 +25,8 @@ $(function() {
 
     $('#pad .button.updown').on('mouseup touchend', function() {
         if (player.buttonsEnabled == false) return; 
+        
+        window.navigator.vibrate(50);
         socket.emit('pad.button',{
             pad: {button: $(this).attr('id'), state: 'up' }
         });
@@ -30,6 +35,8 @@ $(function() {
 
     $('#pad .button.toggle').on('click', function() {
         if (player.buttonsEnabled == false) return; 
+        
+        window.navigator.vibrate(50);
         if ($(this).hasClass('down')) {
             socket.emit('pad.button',{
                 pad: {button: $(this).attr('id'), state: 'up' }
