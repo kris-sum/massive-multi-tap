@@ -1,4 +1,5 @@
 "use strict";
+var config = require("../config.js");
 var robot = require("robotjs");
 var Player = require("./player.js");
 var Admin = require("./admin.js");
@@ -17,8 +18,8 @@ class Manager {
         this.arrPlayersPlayed = [];                     // players who have played get put in this pool
 
         this.cycleGame = 'game1/nes1';                // game file to cycle into play
-        this.cycleTime = 10;
-        this.cycleTimeLeft = 20;
+        this.cycleTime = config.controllerTime;
+        this.cycleTimeLeft = this.cycleTime;
         this.autoCycleEnabled = false;
         
         var self=this;
@@ -31,7 +32,8 @@ class Manager {
         var serverstatus = { 
             'sockets': this.io.engine.clientsCount, 
             'players' : this.getPlayerCount(),
-            'time' : new Date().toJSON() 
+            'time' : new Date().toJSON(),
+            'serverName': config.serverName,
         };
 
         this.io.to('lobby').emit('server-status', serverstatus );
@@ -59,7 +61,7 @@ class Manager {
             }
         }
 
-        if (user.name=='admin') { 
+        if (user.name == config.adminName) { 
             var admin = new Admin(socket);
             admin.setName(user.name);
             this._bindListeners(admin);
@@ -352,7 +354,7 @@ class Manager {
         if (this.cycleTimeLeft<0) {
             this.advanceCycle();
         } else { 
-            this.io.to('admins').to('dashboard').emit('update-dashboard', {'cycleTimeLeft': this.cycleTimeLeft } );
+            this.io.to('admins').to('dashboard').emit('update-dashboard', {'cycleTimeLeft': this.cycleTimeLeft, 'finished':false } );
             setTimeout(function() { self.updateCycleTimer(); } , 1000);
         }
 
@@ -372,6 +374,8 @@ class Manager {
             if (this.arrPlayersUpNext.length != 0) { 
                 player.sendPage('lobby/index.html');
             }
+             this.io.to('admins').to('dashboard').emit('update-dashboard', { 'finished':true } );
+           
         }
 
         if (this.arrPlayersUpNext.length == 0) { 

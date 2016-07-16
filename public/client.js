@@ -8,6 +8,7 @@ $(function() {
     socket.on('server-status', function(data) { 
         $('#statusbar span.connectionCount').html(data.sockets);
         $('#statusbar span.playerCount').html(data.players);
+        $('#statusbar span.serverName').html(data.serverName);
     
         var time = new Date(data.time);
         $('#statusbar span.time').html(time.getHours() + ':'+time.getMinutes()+':'+time.getSeconds());

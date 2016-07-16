@@ -50,3 +50,10 @@ div#timeleft {
     font-size:400%;
     font-weight:bold;
 }
+div#round-over {
+    color:#00000;
+    margin:0.25em;
+    text-align:center; 
+    font-size:400%;
+    font-weight:bold;
+}

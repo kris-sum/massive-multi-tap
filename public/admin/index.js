@@ -75,9 +75,16 @@ $(function() {
     socket.on('update-dashboard', function(data) { 
 
         var timerDiv = $('#timeleft span');
-
-        if (timerDiv) {
+        if (timerDiv && data.cycleTimeLeft) {
             $(timerDiv).html(data.cycleTimeLeft);
+        }
+
+        if (data.finished && data.finished==1) {
+            $('#round-over').show();
+            $('#timeleft').hide();
+        } else { 
+            $('#round-over').hide();
+            $('#timeleft').show();
         }
                    
     });

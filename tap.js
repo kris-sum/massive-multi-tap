@@ -23,6 +23,10 @@ var manager = new Manager(io);
 app.get('/', function (req, res) {
     res.sendFile(__dirname + '/public/index.html');
 });
+app.get('/logout', function (req, res) {
+    req.session.destroy();
+    res.sendFile(__dirname + '/public/logout.html');
+});
 app.use('/', express.static(__dirname + '/public'));
 app.listen(80, function() { console.log('web listening on port 80')});
 
