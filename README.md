@@ -1,6 +1,7 @@
-# Massive Multi Tap
+# Massively Multiiplayer Game Tap
 
 Author: Kris Sum / @switchsystems
+License: GPLv3
 
 This is a node.js , socket.io and HTML5 implementation of a remote gaming controller, 
 allowing you to play games using a mobile device as a controller.
@@ -8,13 +9,17 @@ allowing you to play games using a mobile device as a controller.
 A *Multi-tap* was a device which let more than 2 controllers plug into games consoles like the SNES and megadrive. 
 Why *Massive*? Because this system lets you have an unlimited number of people in control!
 
-Inspired by WifiWars http://wifiwars.co.uk/ and Jackbox Games.
+Inspired by WifiWars http://wifiwars.co.uk/ , Jackbox Games and the 8 player nintendo project by Disney http://arstechnica.co.uk/gadgets/2015/12/8-players-8-projectors-8-bits-and-just-one-nintendo-entertainment-system/ 
 
 ## Technologies
 
 * node.js for the server comms
 * socket.io as the communication mechanism
 * node/robotjs to send keyboard commands
+
+## Requirements
+
+* Redis, for storing session data
 
 ## Caveats
 
